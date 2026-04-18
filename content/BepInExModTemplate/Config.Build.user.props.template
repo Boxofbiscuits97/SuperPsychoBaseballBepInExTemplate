@@ -5,8 +5,12 @@
 
     <!-- Set if your BepInEx/ directory isn't in the game files. -->
     <!-- <SuperPsychoBaseballBepInExDir></SuperPsychoBaseballBepInExDir> -->
-
-    <!-- Enable/disable deploying mod files to BepInEx directory. -->
-    <DeployModFilesEnabled>true</DeployModFilesEnabled>
   </PropertyGroup>
+
+  <Target Name="DeployFiles" AfterTargets="Build">
+    <Message Text="Deploy → $(PluginsDir)$(AssemblyName).dll" Importance="High" />
+    <Error Text="Plugins directory '$(PluginsDir)' doesn't exist!" Condition="!Exists('$(PluginsDir)')" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginsDir)" />
+  </Target>
+  
 </Project>

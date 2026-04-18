@@ -91,7 +91,6 @@ The template "SuperPsychoBaseball BepInEx Plugin" was created successfully.
 ├── Config.Build.user.props.template
 ├── Directory.Build.props
 ├── Directory.Build.targets
-├── global.json
 ├── icon.png
 ├── LICENSE
 ├── MyCoolMod.slnx
