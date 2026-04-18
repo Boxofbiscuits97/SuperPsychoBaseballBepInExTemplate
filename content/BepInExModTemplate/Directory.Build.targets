@@ -1,12 +1,10 @@
 <Project>
-<!--#if (!no-tutorial) -->
   <!--
     This is a special file that contains shared configuration
     for all project files in subdirectories.
   -->
 
-<!--#endif -->
-  <!-- Set additional NuGet sources -->
+  <!-- Set extra NuGet sources -->
   <PropertyGroup>
     <RestoreAdditionalProjectSources>
       https://nuget.bepinex.dev/v3/index.json;
@@ -14,31 +12,12 @@
     </RestoreAdditionalProjectSources>
   </PropertyGroup>
 
-  <!-- Build dependencies -->
-  <ItemGroup>
-<!--#if (!no-tutorial) -->
-    <!--
-      If you upload your project on NuGet, PrivateAssets="all"
-      prevents consumers of your package from referencing these
-      packages transitively. This is desired because these packages
-      are not required by anyone using your package as they are
-      code analyzers, source generators, or other build-only packages.
-    -->
-<!--#endif -->
-    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
-    <PackageReference Include="Hamunii.BepInEx.AutoPlugin" Version="2.1.*" PrivateAssets="all" />
-<!--#if (!no-tutorial) -->
-    <!-- Source-only polyfills for C# language features https://github.com/Sergio0694/PolySharp -->
-<!--#endif -->
-    <PackageReference Include="PolySharp" Version="1.15.0" PrivateAssets="all" />
-  </ItemGroup>
-
   <!-- Modding dependencies -->
   <ItemGroup>
     <PackageReference Include="BepInEx.Core" Version="5.4.21" />
-    <!-- In reality BepInEx 5.4.21 ships HarmonyX 2.9 but BepInEx.Core gives us 2.7 -->
-    <PackageReference Include="HarmonyX" Version="2.9.0" />
+    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+    <PackageReference Include="Hamunii.BepInEx.AutoPlugin" Version="2.0.*" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- NuGet fallback stripped game references -->
@@ -48,63 +27,24 @@
 
   <!-- Local game references -->
   <ItemGroup Condition="Exists('$(ManagedDir)')">
-<!--#if (!no-tutorial) -->
     <!--
       Reference all assemblies except ones that come
-      with our target framework or would cause conflicts.
-      Private="false" prevents these from being copied to build output.
+      with our target framework or would cause conflicts
     -->
-<!--#endif -->
     <LocalReferences
       Include="$(ManagedDir)*.dll"
       Exclude="$(ManagedDir)Mono*.dll;$(ManagedDir)netstandard.dll;$(ManagedDir)System*.dll;$(ManagedDir)mscorlib.dll"
     />
     <Reference Include="@(LocalReferences)" Private="false" />
-<!--#if (!no-tutorial) -->
-    <!--
-      Publicize these assemblies so we can access their internal members.
-      Learn more at: https://github.com/BepInEx/BepInEx.AssemblyPublicizer
-    -->
-<!--#endif -->
+    <!-- Publicize these assemblies so we can access their internal members -->
     <Reference Include="$(ManagedDir)Assembly-CSharp.dll" Private="false" Publicize="true" />
   </ItemGroup>
 
-  <!-- Copy mod files defined in projects to the target BepInEx directory -->
-  <Target Name="DeployFiles" AfterTargets="Build" Condition="'$(DeployModFilesEnabled)' == 'true'">
-    <PropertyGroup>
-      <_TargetDir>$([MSBuild]::NormalizeDirectory($(SuperPsychoBaseballBepInExDir)))</_TargetDir>
-    </PropertyGroup>
-    <Message
-      Text="Deploy → @(DeployModFiles -> '%(BepInExDir)%(FileName)%(Extension)')"
-      Importance="High"
-    />
-    <Error
-      Text="BepInEx directory '$(_TargetDir)' doesn't exist! Configure SuperPsychoBaseballBepInExDir to point to a valid path in the Config.Build.user.props file."
-      Condition="!Exists('$(_TargetDir)')"
-    />
-    <Copy SourceFiles="@(DeployModFiles)" DestinationFolder="$(_TargetDir)%(BepInExDir)" />
-  </Target>
-
   <!--
-    To make building Thunderstore packages uncoupled from release builds, swap
-    the positions of this Target line:
-    <Target
-      Name="PackTS"
-      DependsOnTargets="Build"
-      Condition="'$(ThunderstorePackable)' != 'false'"
-    >
-    and the one below.
-
-    If you uncouple Thunderstore package builds from release builds, you can build
-    Thunderstore packages by calling `dotnet build -c Release -target:PackTS -v d` (verbosity detailed).
-
+    Build Thunderstore package by calling `dotnet build -c Release -target:PackTS -v d` (verbosity detailed).
     Publish to Thunderstore by including `-property:PublishTS=true` in the command.
   -->
-  <Target
-    Name="PackTS"
-    AfterTargets="Build"
-    Condition="'$(Configuration)' == 'Release' And '$(ThunderstorePackable)' != 'false'"
-  >
+  <Target Name="PackTS" DependsOnTargets="Build" Condition="$(ThunderstorePackable) != 'false'">
     <Error
       Text=" PackTS must be called with Release configuration."
       Condition="'$(Configuration)' != 'Release'"
@@ -116,4 +56,5 @@
     <Exec Command="dotnet tool restore" />
     <Exec Command="dotnet tcli $(BuildArgument) --package-version $(Version)" />
   </Target>
+
 </Project>
