@@ -1,12 +1,12 @@
 {
     "$schema": "http://json.schemastore.org/template",
-    "author": "_TemplateAuthorNoSpaces_",
+    "author": "Boxofbiscuits97",
     "classifications": [
         "BepInEx", "Plugin", "Mod"
     ],
-    "identity": "com.github._TemplateAuthorNoSpaces_.BepInExTemplate",
-    "name": "_GameName_ BepInEx Plugin",
-    "shortName": "_GameNameShortNoSpacesLowercase_mod",
+    "identity": "com.github.Boxofbiscuits97.BepInExTemplate",
+    "name": "Super Psycho Baseball BepInEx Plugin",
+    "shortName": "spbmod",
     "tags": {
         "language": "C#",
         "type": "project"
